@@ -58,13 +58,76 @@ import webbrowser
 import csv
 </code></pre>
 
-<p>Facebook support OAuth authentication.To get access to the facebook Graph API ,authentication is required.</p>
+<p>Facebook supports OAuth authentication.To get access to the facebook Graph API ,authentication is required.</p>
 
-<p>webbrowser.open("<a href="https://www.facebook.com/dialog/oauth?">https://www.facebook.com/dialog/oauth?</a>"
+<pre><code>webbrowser.open("https://www.facebook.com/dialog/oauth?"
                     "response_type=token&amp;client_id=145634995501895&amp;"
-                    "redirect_uri=<a href="http://developers.facebook.com/tools/">http://developers.facebook.com/tools/</a>"
+                    "redirect_uri=http://developers.facebook.com/tools/"
                     "explorer/callback&amp;scope=user_birthday,user_friends,publish_actions"
-                    ",read_stream")</p>
+                    ",read_stream")
+</code></pre>
+
+<p>Once authentication is done , we can proceed with the Facebook Graph Explorer to get an access token.This token will be used for every query that is made to the API.</p>
+
+<pre><code> webbrowser.open("http://developers.facebook.com/tools/explorer")
+</code></pre>
+
+<p>Copy the access token to any local variable when asked </p>
+
+<pre><code>ACCESS_TOKEN = raw_input("\nEnter the TOKEN string obtained from API explorer page: \n")
+</code></pre>
+
+<p>Now lets fetch some JSON data from the API.</p>
+
+<pre><code>hometown=urllib2.urlopen(ACCESS_URL+'https://graph.facebook.comfields=friends.fields(hometown)&amp;access_token='+ACCESS_TOKEN)
+</code></pre>
+
+<p>Now we have the entire JSON info about mu facebook friend and their hometown.
+Now we have to parse the JSON to get individual hometown.</p>
+
+<pre><code>   count=1
+   while(count&lt;numoffriends):    
+        if 'hometown' in json.loads(datafile.read())['friends']['data'][k]:
+            fhometown=json.loads(datafile.read())['friends']['data'][k]['hometown']['name']
+            decode_address_to_coordinates(fhometown)          
+        count=count+1
+</code></pre>
+
+<p>Now we have the string of the hometown of all my facobook friend ,lets find the co-ordinates using Google MAP API and put the data in a csv file.</p>
+
+<pre><code>def decode_address_to_coordinates(address):
+        params = {
+                'address' : address,
+                'sensor' : 'true',
+        }  
+        url = 'http://maps.google.com/maps/api/geocode/json?' + urllib.urlencode(params)
+        response = urllib2.urlopen(url)
+        result = json.load(response)
+        log=result['results'][0]['geometry']['location']['lng']
+        lat=result['results'][0]['geometry']['location']['lat']
+
+        p='%f,%f'%(log,lat)
+        myfile=open("data.csv", "a")
+        myfile.write(p + "\n")
+</code></pre>
+
+<p>Now atlast we have the co-oridnate details of all my friends.</p>
+
+<h2>
+<a id="drawing-the-map-with-r" class="anchor" href="#drawing-the-map-with-r" aria-hidden="true"><span class="octicon octicon-link"></span></a>Drawing the Map with R</h2>
+
+<p>Lets first install all the required packages,</p>
+
+<pre><code>library(ggmap)
+library(geosphere)
+library(maps)
+library(ggplot2)
+</code></pre>
+
+<p>To install any package in R type ,</p>
+
+<pre><code>package.install(packagename)
+</code></pre>
 
 <p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
 
